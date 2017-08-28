@@ -1,7 +1,8 @@
 (ns counterpoint.core
   (:gen-class)
   (:require [overtone.live :refer :all]
-            [overtone.inst.sampled-piano :refer :all]))
+            [overtone.inst.sampled-piano :refer :all]
+            [roul.random :as roul]))
 
 (def m (metronome 120))
 
@@ -27,28 +28,36 @@
     ;;climax can note be the same as the cantus climax, and shouldn't be the first / last 3 notes
     (rand-nth (into [] climax-index-range))))
 
-
 ;;when calculating next note, there are several restrictions
 ;;it should not be more than a twelfth away from the cantus note
 ;;no similar motion into perfect intervals
 ;;never two consecutive perfect intervals
 
+(def consonant-intervals-within-range
+  {:major [2 4 7 9 12 14 16]
+   :minor [2 3 7 8 12 14 15]})
+
+;;we can reduce filter over a bunch of conditions to wittle down the valid intervals
+(defn pick-note [cantus first-species consonant-intervals])
+
+;;This is a recursion problem, instead of updating some atom, we should recur over the first species
+;;vector that we're building until it is full. Each time the function is run it adds or changes one
+;;of the notes.
+;;this also lets us lazily implement "restarting if what is here won't work"; if we get to a point
+;;where we have no legal notes we can change or add, and the vector is not full, we re-call the function
+;;with nils, as if we're building for the first time, and we let rng do the work
+
+(defn compose [cantus species possible-notes]
+  (prn species)
+  (if (= (count cantus) (count species))
+    species
+    (compose cantus (conj species (rand-nth possible-notes)) possible-notes)))
+
 (defn notes-to-climax [start-note cantus climax-index scale]
   (let [cantus-range (rest (take (inc climax-index) cantus))
-        consonant-intervals (map #(degree->interval % scale) [:i :ii :iii :iv :v :vi :vii])
-        ;;we are inclined to move up until we get to the climax, are allowed to move down,
-        ;;let's say 80% of the time we move up
-        ascend-inclination 0.8
-        climax-notes (atom [])
-        direction (if (> (rand) ascend-inclination)
-                    :down
-                    :up)]
-    (prn consonant-intervals)
-    (last (map-indexed
-           (fn [index n]
-             (swap! climax-notes assoc index (+ -5 n)))
-           cantus-range))
-    ))
+        consonant-intervals (scale consonant-intervals-within-range)]
+    (prn "Possible intervals:" consonant-intervals)
+    (compose cantus-range [] consonant-intervals)))
 
 (defn construct-first-species [cantus-intervals scale]
   ;;always just do above for now
@@ -66,9 +75,8 @@
         filler-nils (repeat (- (count intervals) 3 (count notes-to-climax)) nil)
         first-species (into []
                             (flatten [first-note notes-to-climax filler-nils penultimate conclusion]))]
-    (prn climax-index)
-    (prn intervals)
-    (prn first-species)
+    (prn "Cantus:" intervals)
+    (prn "First :" first-species)
     first-species))
 
 (def my-piano #(sampled-piano % 1 1 0 0 0.5 0.5 0 -4 1))
