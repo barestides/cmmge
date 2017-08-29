@@ -1,6 +1,7 @@
 (ns counterpoint.core
   (:gen-class)
-  (:require [overtone.live :refer :all]
+  (:require [clojure.set :as set]
+            [overtone.live :refer :all]
             [overtone.inst.sampled-piano :refer :all]
             [roul.random :as roul]))
 
@@ -38,6 +39,10 @@
    :minor [2 3 7 8 12 14 15]})
 
 ;;we can reduce filter over a bunch of conditions to wittle down the valid intervals
+;;let's elminate illegal possibilities before focusing on making stepwise motion a
+;;priority
+
+
 (defn pick-note [cantus first-species consonant-intervals])
 
 ;;This is a recursion problem, instead of updating some atom, we should recur over the first species
@@ -47,17 +52,43 @@
 ;;where we have no legal notes we can change or add, and the vector is not full, we re-call the function
 ;;with nils, as if we're building for the first time, and we let rng do the work
 
+(def perfect-intervals #{7 12 0})
+(defn filter-perfects
+  [previous-interval notes]
+  (if (some true? (map (partial = previous-interval)
+                       perfect-intervals))
+    (set/difference notes perfect-intervals)
+    notes))
+
 (defn compose [cantus species possible-notes]
   (prn species)
-  (if (= (count cantus) (count species))
-    species
-    (compose cantus (conj species (rand-nth possible-notes)) possible-notes)))
+  (prn cantus)
+  (cond (= (count cantus) (count species))
+        species
+
+        :otherwise
+        (let [clipped-cantus (take (count species) cantus)
+              previous-species-note (last species)
+              previous-cantus-note (last clipped-cantus)
+              current-cantus-note (get cantus (count species))
+              cantus-interval (- current-cantus-note previous-cantus-note)
+              previous-interval (- previous-species-note previous-cantus-note)
+              wittled-possibilities (->> possible-notes
+                                         set
+                                         (filter-perfects previous-interval)
+                                         (into []))
+              _ (prn "wittled " wittled-possibilities)
+              next-note (rand-nth wittled-possibilities)
+              _ (prn next-note)
+              new-species (conj species next-note)
+              last-interval (- (last species) (last clipped-cantus))]
+          (compose cantus new-species possible-notes))))
 
 (defn notes-to-climax [start-note cantus climax-index scale]
-  (let [cantus-range (rest (take (inc climax-index) cantus))
+  (let [cantus-range (into [] (take (inc climax-index) cantus))
         consonant-intervals (scale consonant-intervals-within-range)]
-    (prn "Possible intervals:" consonant-intervals)
-    (compose cantus-range [] consonant-intervals)))
+    (prn "Possible intervals:" cantus-range)
+    (compose cantus-range [start-note] consonant-intervals)))
 
 (defn construct-first-species [cantus-intervals scale]
   ;;always just do above for now
@@ -102,13 +133,15 @@
     (when (not-empty (rest notes))
       (apply-by (m next)  #'play-notes [next (rest notes) l]))))
 
-(play-counterpoint
- (m)
- (-> cantus-firmi
-     :ss4
-     first
-     note)
- (mapv note (:ss4 cantus-firmi))
- (construct-first-species (:ss4 cantus-firmi-intervals) :major))
+;; (play-counterpoint
+;;  (m)
+;;  (-> cantus-firmi
+;;      :ss4
+;;      first
+;;      note)
+;;  (mapv note (:ss4 cantus-firmi))
+;;  (construct-first-species (:ss4 cantus-firmi-intervals) :major))
+
+(construct-first-species (:ss4 cantus-firmi-intervals) :major)
 
 ;; (play-notes (m) (degrees->pitches (:ss4 cantus-firmi-intervals) :major :c3) 2)
