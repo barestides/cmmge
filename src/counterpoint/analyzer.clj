@@ -1,5 +1,6 @@
 (ns counterpoint.analyzer
-  (:require [counterpoint.util :as util]))
+  (:require [counterpoint.util :as util]
+            [counterpoint.cantus-firmi :as cantus-firmi]))
 
 ;;What do we want to look at?
 
@@ -25,5 +26,11 @@
                               (count cantus)))
         climax-depth (float (/ (inc (climax-index cantus-intervals))
                                (count cantus)))]
-    (println "Variability: " variability)
-    (println "Climax Depth: " climax-depth)))
+    {:variability variability
+     :climax-depth climax-depth}))
+
+(def cantus-averages
+  (let [cantus-analytics (map analyze-cantus (vals cantus-firmi/cantus-firmi))]
+    (apply merge (map (fn [key]
+                        {key (util/mean (map key cantus-analytics))})
+                      (keys (first cantus-analytics))))))
