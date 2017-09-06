@@ -7,3 +7,6 @@
   (map (fn [pitch] (-> pitch
                        note
                        (- (note root)))) pitches))
+
+(defn mean [coll]
+  (float (/ (apply + coll) (count coll))))

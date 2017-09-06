@@ -3,8 +3,6 @@
             [roul.random :as roul]
             [counterpoint.analyzer :as analyzer]))
 
-
-
 (defn climax-index [cantus-firmi-intervals]
   (let [cantus-climax (analyzer/climax-index cantus-firmi-intervals)
         climax-index-range (disj (set (range 3 (- (count cantus-firmi-intervals) 3)))
