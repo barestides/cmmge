@@ -70,7 +70,7 @@
                            current-cantus-note)
               new-species (conj species next-note)
               last-interval (- (last species) (last clipped-cantus))]
-          (compose cantus new-species possible-notes))))
+          (recur cantus new-species possible-notes))))
 
 (defn notes-to-climax [start-note cantus climax-index scale]
   (let [cantus-range (into [] (take (inc climax-index) cantus))
@@ -99,7 +99,7 @@
                             (flatten [notes-to-climax filler-nils penultimate conclusion]))]
     (prn "Cantus:" cantus-intervals)
     (prn "First :" first-species)
-    (prn "Diffe :" (map (fn [f c]
+    (prn "Diff  :" (map (fn [f c]
                           (if (nil? f)
                             nil
                             (- f c)))
