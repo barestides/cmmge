@@ -1,12 +1,13 @@
 (ns counterpoint.core
   (:gen-class)
   (:require [counterpoint.generation :as gen]
+            [counterpoint.cantus-firmi :as cantus-firmi]
             [overtone.live :refer :all]
             [overtone.inst.sampled-piano :refer :all]))
 
 (def m (metronome 120))
 
-(def cantus-firmi-intervals {:ss4 [:i :ii :iv :iii :iv :v :vi :v :iii :ii :i]})
+(def cantus-firmi-intervals {:schenker [:i :ii :iv :iii :iv :v :vi :v :iii :ii :i]})
 (def my-piano #(sampled-piano % 1 1 0 0 0.5 0.5 0 -4 1))
 
 (defn play-counterpoint [nome root cantus-firmus first-species]
@@ -30,16 +31,20 @@
     (when (not-empty (rest notes))
       (apply-by (m next)  #'play-notes [next (rest notes) l]))))
 
-;; (play-counterpoint
-;;  (m)
-;;  (-> cantus-firmi
-;;      :ss4
-;;      first
-;;      note)
-;;  (mapv note (:ss4 cantus-firmi))
-;;  (construct-first-species (:ss4 cantus-firmi-intervals) :major))
+(defn play []
+  (play-counterpoint
+   (m)
+   (-> cantus-firmi/cantus-firmi
+       :schenker
+       first
+       note)
+   (mapv note (:schenker cantus-firmi/cantus-firmi))
+   (gen/construct-first-species (map #(degree->interval % :major)
+                                     (:schenker cantus-firmi-intervals))
+                                :major)))
 
-(gen/construct-first-species (map #(degree->interval % :major)
-                                  (:ss4 cantus-firmi-intervals)) :major)
+(defn construct [] (gen/construct-first-species (map #(degree->interval % :major)
+                                                     (:schenker cantus-firmi-intervals)) :major))
 
-;; (play-notes (m) (degrees->pitches (:ss4 cantus-firmi-intervals) :major :c3) 2)
+(defn play-cantus [cantus]
+  (play-notes (m) (degrees->pitches (cantus cantus-firmi-intervals) :major :c4) 1))

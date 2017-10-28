@@ -14,11 +14,19 @@
 (def progression [:i :iv :v :vi])
 
 (def chords [[:d4 :minor]
-             [:e4 :minor]
+             [:b4 :minor]
              [:b3 :minor]
              [:g3 :major]])
 
 (def m (metronome 120))
+
+(def progression-spec {:length 4})
+
+;;can't use `key` as a name smh
+(defn gen-progression [thekey specs]
+
+  )
+
 
 (defn play-chords [nome instm chord-notes pattern]
   (let [note-length (float (/ 1 (count pattern)))]
