@@ -1,7 +1,7 @@
-(ns counterpoint.generation
+(ns cmmge.generation
   (:require [clojure.set :as set]
             [roul.random :as roul]
-            [counterpoint.analyzer :as analyzer]))
+            [cmmge.analyzer :as analyzer]))
 
 (defn climax-index [cantus-firmi-intervals]
   (let [cantus-climax (analyzer/climax-index cantus-firmi-intervals)

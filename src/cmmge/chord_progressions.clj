@@ -1,4 +1,4 @@
-(ns counterpoint.chord-progressions
+(ns cmmge.chord-progressions
   (:require [overtone.live :refer :all]
             [overtone.synth.sampled-piano :as p]))
 

@@ -1,7 +1,7 @@
-(ns counterpoint.core
+(ns cmmge.core
   (:gen-class)
-  (:require [counterpoint.generation :as gen]
-            [counterpoint.cantus-firmi :as cantus-firmi]
+  (:require [cmmge.generation :as gen]
+            [cmmge.cantus-firmi :as cantus-firmi]
             [overtone.live :refer :all]
             [overtone.inst.sampled-piano :refer :all]))
 
