@@ -1,4 +1,4 @@
-(ns cmmge.cantus-firmi)
+(ns cmmge.counterpoint.cantus-firmi)
 
 (def cantus-firmi {:ss1 [:c4 :d4 :e4 :f4 :g4 :d4 :f4 :e4 :d4 :c4]
                    :ss2 [:d4 :g4 :f#4 :b4 :a4 :f#4 :g4 :f#4 :e4 :d4]

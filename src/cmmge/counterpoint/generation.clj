@@ -1,4 +1,4 @@
-(ns cmmge.generation
+(ns cmmge.counterpoint.generation
   (:require [clojure.set :as set]
             [roul.random :as roul]
             [cmmge.analyzer :as analyzer]))
