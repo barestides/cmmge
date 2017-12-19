@@ -1,6 +1,8 @@
-# counterpoint
+# cmmge
 
-Generating counterpoint melodies using overtone.
+Collection of Miscellaneous Music Generation Experiments
+
+Though I guess it's not limited to generation.
 
 Copyright © 2017 Braden Arestides
 
