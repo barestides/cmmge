@@ -6,5 +6,6 @@
                  [overtone "0.10.1"]
                  [roul "0.2.0"]]
   :main ^:skip-aot cmmge.core
+  :jvm-opts ^:replace []
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})

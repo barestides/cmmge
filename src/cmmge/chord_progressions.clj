@@ -1,6 +1,6 @@
 (ns cmmge.chord-progressions
   (:require [overtone.live :refer :all]
-            [overtone.synth.sampled-piano :as p]))
+            [cmmge.instruments :as insts]))
 
 (def patterns {:quarters [[1] [1] [1] [1]]
                :eigths [[1 1] [1 1] [1 1] [1 1]]
@@ -38,8 +38,6 @@
               (flatten (map instm (apply chord chord-notes))))))
       pattern))))
 
-(def my-piano #(p/sampled-piano % 1 1 0 0 0.5 0.2 0 -4 1))
-
 (defn play-measure [nome instm chord-notes pattern]
   (let [next-bar (+ nome 4)]
     (flatten
@@ -48,4 +46,4 @@
                   pattern))
     (apply-by (m next-bar) #'play-measure [next-bar instm (rest chord-notes) pattern])))
 
-(play-measure (m) my-piano (cycle chords) (:somethin-sexy patterns))
+;; (play-measure (m) insts/piano (cycle chords) (:somethin-sexy patterns))

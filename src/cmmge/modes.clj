@@ -2,7 +2,8 @@
   (:require [overtone.live :refer :all]
             [overtone.inst.sampled-piano :refer :all]
             [overtone.inst.synth :refer :all]
-            [overtone.inst.drum :refer :all]))
+            [overtone.inst.drum :refer :all]
+            [cmmge.instruments :as insts]))
 
 (def m (metronome 120))
 (def my-piano
@@ -12,22 +13,6 @@
 ;;duration is based off of quarter note 1 = 1 quarter note, 0.5 = one eigth note.
 
 (def pi 3.14159)
-
-(definst my-bass-inst [freq 60 attack 0.01 sustain 0.4 release 0.1 vol 1]
-  (* (env-gen (lin attack sustain release) 1 1 0 1 FREE)
-     (+ (rlpf
-         (+ (saw freq))
-         300
-         0.2)
-        (bpf
-         (+ (saw freq))
-         800
-         0.2))
-
-     vol))
-
-(defn my-bass [note]
-  (my-bass-inst (midi->hz note)))
 
 
 (defn transpose-melody
@@ -106,7 +91,7 @@
 
 (def bassline [[:a3 1] [:d3 1] [:g3 1] [:c3 1] [:f3 1] [:b2 1] [:c#3 1]])
 
-(melody-player (m) bassline my-bass)
+;; (melody-player (m) bassline insts/bass)
 
 ;; (play-measure (m) my-piano (cycle progression) [[1]])
 ;; (melody-player (m) (walking-bassline progression) bass)
