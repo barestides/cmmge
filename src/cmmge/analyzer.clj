@@ -1,6 +1,6 @@
 (ns cmmge.analyzer
   (:require [cmmge.util :as util]
-            [cmmge.cantus-firmi :as cantus-firmi]))
+            [cmmge.counterpoint.cantus-firmi :as cantus-firmi]))
 
 ;;What do we want to look at?
 

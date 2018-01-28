@@ -91,7 +91,7 @@
 
 (def bassline [[:a3 1] [:d3 1] [:g3 1] [:c3 1] [:f3 1] [:b2 1] [:c#3 1]])
 
-;; (melody-player (m) bassline insts/bass)
+(melody-player (m) bassline insts/bass)
 
 ;; (play-measure (m) my-piano (cycle progression) [[1]])
 ;; (melody-player (m) (walking-bassline progression) bass)

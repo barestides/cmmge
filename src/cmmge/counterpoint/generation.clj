@@ -1,6 +1,9 @@
 (ns cmmge.counterpoint.generation
   (:require [clojure.set :as set]
             [roul.random :as roul]
+            [overtone.music.pitch :refer :all]
+            [overtone.algo.chance :as chance]
+            [cmmge.constants :refer :all]
             [cmmge.analyzer :as analyzer]))
 
 (defn climax-index [cantus-firmi-intervals]
@@ -105,3 +108,26 @@
                             (- f c)))
                         first-species cantus-intervals))
     first-species))
+
+(def jump-vals
+  {:step [1]
+   :hop [2 3]
+   :leap [4 5 6]})
+
+(def jump-percentages
+  {:step 0.7
+   :hop 0.2
+   :leap 0.1})
+
+(defn plot-notes
+  ([start-pitch end-pitch duration base-rhythm]
+   (plot-notes start-pitch end-pitch duration base-rhythm
+               [{:pitch start-pitch :duration base-rhythm}]))
+  ([start-pitch end-pitch duration base-rhythm melody]
+   ;;duration is no of beats
+   ;;let's not worry about amp for now
+   (let [distance (Math/abs (- (note start-pitch) (note end-pitch)))
+         interval (chance/choose ((chance/weighted-choose jump-percentages) jump-vals))]
+     (conj )
+
+     )))
