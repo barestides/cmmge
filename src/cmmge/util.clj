@@ -13,8 +13,10 @@
 (defn mean [coll]
   (float (/ (apply + coll) (count coll))))
 
-(defn spy [f]
-  (pprint/pprint (f)) (f))
-
 (defn percent-chance [percent]
   (< (rand) percent))
+
+(defn spy
+  [x & [f]]
+  (pprint/pprint (if f (f x) x))
+  x)

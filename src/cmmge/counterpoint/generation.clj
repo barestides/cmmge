@@ -4,6 +4,7 @@
             [overtone.music.pitch :refer :all]
             [overtone.algo.chance :as chance]
             [cmmge.constants :refer :all]
+            [cmmge.util :as util]
             [cmmge.analyzer :as analyzer]))
 
 (defn climax-index [cantus-firmi-intervals]
@@ -47,8 +48,7 @@
 (defn filter-perfects
   [notes previous-interval]
   ;;if previous is perfect, remove perfect intervals from possibilities
-  (if (some true? (map (partial = previous-interval)
-                       perfect-intervals))
+  (if (contains? perfect-intervals previous-interval)
     (set/difference notes perfect-intervals)
     notes))
 
@@ -68,6 +68,7 @@
               wittled-possibilities (-> possible-notes
                                         set
                                         (filter-perfects previous-interval)
+                                        util/spy
                                         (disj previous-species-note))
               next-note (+ (rand-nth (into [] wittled-possibilities))
                            current-cantus-note)
