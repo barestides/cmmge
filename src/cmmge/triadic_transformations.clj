@@ -16,13 +16,22 @@
     [root (inc third) fifth]
     [root (dec third) fifth]))
 
+;;ughhh we want to "flatten" a chord to its first inversion, b/c these transformtions don't take
+;;inversions into account.
+(defn first-inversion
+  [triad]
+  (let [sorted (sort triad)]
+    )
+  )
+
+
 (defn r-transform
   "Transform a chord to its Relative
   CM -> Am"
   [[root third fifth]]
   (if (minor? root third)
-    [root third (dec fifth)]
-    [root third (inc fifth)]))
+    [(- root 2) third fifth]
+    [root third (+ fifth 2)]))
 
 (defn l-transform
   "Transform a chord to its Leading-Tone Exchange
@@ -65,8 +74,8 @@
 
 (defn transform
   [chord]
-  (let [transformation (chance/choose [p-transform r-transform l-transform])]
-    (prn transformation)
+  (let [transformation (chance/choose [r-transform])]
+    (prn transformation "  " (map pitch/find-note-name chord) (pitch/find-chord chord))
     (transformation-dispatcher transformation chord)))
 
 (defn progression-notes
@@ -76,7 +85,7 @@
    (cond
 
      (empty? so-far)
-     (recur start-chord length [start-chord])
+     (recur start-chord length [(sort start-chord)])
 
      (= (count so-far) length)
      so-far
