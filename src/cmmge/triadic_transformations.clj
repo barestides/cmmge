@@ -1,6 +1,8 @@
 (ns cmmge.triadic-transformations
-  (:require [overtone.algo.chance :as chance]
-            [overtone.music.pitch :as pitch]))
+  (:require [clojure.core.match :refer [match]]
+            [overtone.algo.chance :as chance]
+            [overtone.music.pitch :as pitch]
+            [cmmge.pitch-utils :as mypitch]))
 
 ;; https://en.wikipedia.org/wiki/Neo-Riemannian_theory#Triadic_transformations_and_voice_leading
 
@@ -21,9 +23,9 @@
 (defn first-inversion
   [triad]
   (let [sorted (sort triad)]
-    )
-  )
-
+    (if (= (- (last sorted) (first sorted)) 7)
+      sorted
+      (recur (mypitch/invert-chord sorted (chance/choose [1 -1]))))))
 
 (defn r-transform
   "Transform a chord to its Relative
@@ -38,17 +40,18 @@
   CM -> Em"
   [[root third fifth]]
   (if (minor? root third)
-    [(inc root) third fifth]
+    [root third (inc fifth)]
     [(dec root) third fifth]))
+
+(defn tiered-transform
+  [transformations]
+  (apply comp (interleave transformations (repeat first-inversion))))
 
 (defn n-transform
   "Transform a chord to its minor subdominant.
   CM -> Fm "
   [chord]
-  (-> chord
-      r-transform
-      l-transform
-      p-transform))
+  ((tiered-transform [r-transform l-transform p-transform]) chord))
 
 (defn s-transform
   "Exchanges two triads that share a third
@@ -74,9 +77,9 @@
 
 (defn transform
   [chord]
-  (let [transformation (chance/choose [r-transform])]
-    (prn transformation "  " (map pitch/find-note-name chord) (pitch/find-chord chord))
-    (transformation-dispatcher transformation chord)))
+  (let [transformation (chance/choose [l-transform p-transform r-transform])]
+    (prn transformation "  " chord (map pitch/find-note-name chord) (pitch/find-chord chord))
+    (first-inversion (transformation chord))))
 
 (defn progression-notes
   ([start-chord length]

@@ -3,7 +3,10 @@
             [roul.random :as roul]
             [overtone.music.pitch :refer :all]
             [overtone.algo.chance :as chance]
+            [overtone.algo.lists :as lists]
             [cmmge.constants :refer :all]
+            [cmmge.chance-utils :as cu]
+            [cmmge.pitch-utils :as pu]
             [cmmge.util :as util]
             [cmmge.analyzer :as analyzer]))
 
@@ -110,6 +113,19 @@
                         first-species cantus-intervals))
     first-species))
 
+;; (defn plot-notes
+;;   ([start-pitch end-pitch duration base-rhythm]
+;;    (plot-notes start-pitch end-pitch duration base-rhythm
+;;                [{:pitch start-pitch :duration base-rhythm}]))
+;;   ([start-pitch end-pitch duration base-rhythm melody]
+;;    ;;duration is no of beats
+;;    ;;let's not worry about amp for now
+;;    (let [distance (Math/abs (- (note start-pitch) (note end-pitch)))
+;;          interval (chance/choose ((chance/weighted-choose jump-percentages) jump-vals))]
+;;      (conj )
+
+;;      )))
+
 (def jump-vals
   {:step [1]
    :hop [2 3]
@@ -120,15 +136,81 @@
    :hop 0.2
    :leap 0.1})
 
-(defn plot-notes
-  ([start-pitch end-pitch duration base-rhythm]
-   (plot-notes start-pitch end-pitch duration base-rhythm
-               [{:pitch start-pitch :duration base-rhythm}]))
-  ([start-pitch end-pitch duration base-rhythm melody]
-   ;;duration is no of beats
-   ;;let's not worry about amp for now
-   (let [distance (Math/abs (- (note start-pitch) (note end-pitch)))
-         interval (chance/choose ((chance/weighted-choose jump-percentages) jump-vals))]
-     (conj )
+(def direction-pcts
+  {1 0.7
+   -1 0.3})
 
-     )))
+(defn melody-length
+  [melody]
+  (apply + (map :duration melody)))
+
+(defn first-melody-note [notes]
+  {:pitch (first notes)
+   :amp 1
+   :duration 1})
+
+(defn next-duration
+  [melody]
+  (let [durations (mapv :duration melody)
+        last-dur (last durations)
+        same-len-streak (count (take-while (partial = last-dur) (reverse durations)))
+        all-dur-choices #{1 0.5}
+        dur-choices (vec (cond
+                           ;;if we've had 4 of the same note lengths, don't allow the next note to
+                           ;;be of the same length
+                           (< 3 same-len-streak)
+                           (disj all-dur-choices last-dur)
+
+                           :else
+                           all-dur-choices))]
+    (chance/choose dur-choices)))
+
+(defn next-pitch
+  [melody notes length]
+  (let [completeness (float (/ (melody-length melody) length))
+        dir-pcts (cond
+                   (<= completeness 0.5)
+                   {1 0.2
+                    -1 0.8}
+
+                   (> completeness 0.5)
+                      {1 0.8
+                       -1 0.2})
+        direction (cu/weighted-choose dir-pcts)
+        step-distance (chance/choose (jump-vals (cu/weighted-choose jump-percentages)))
+        last-pitch (:pitch (last melody))
+        chromatic-pitch (+ last-pitch (* step-distance direction))
+        diatonic-pitch (first (subseq notes >= chromatic-pitch))]
+
+    (prn "c" (note-info chromatic-pitch))
+    (prn "d" (note-info diatonic-pitch))
+
+    ;;when completeness is < 0.5, we should move further away from the tonic
+    ;;when it is  > 0.5, we should move towards the tonic
+    (+ (* step-distance direction) diatonic-pitch)))
+
+;;length is beats
+(defn diatonic-melody-maker
+  ([key length]
+   (diatonic-melody-maker key length []))
+  ([key length melody]
+   (let [notes (apply scale key)
+         all-notes (pu/possible-notes (first notes) nil nil)
+         mlength (melody-length melody)]
+     (cond
+
+       (= mlength 0) (recur key length [(first-melody-note notes)])
+
+       (>= mlength length) melody
+
+       :else
+       (let [step-distance (chance/choose (jump-vals (cu/weighted-choose jump-percentages)))
+             next-pitch (next-pitch melody all-notes length)
+             ;; _ (prn next-pitch)
+             next-duration (next-duration melody)
+             next-note {:pitch next-pitch
+                        :amp 1
+                        :duration next-duration}]
+         (recur key length (conj melody next-note)))
+
+       ))))
