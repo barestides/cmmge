@@ -27,23 +27,15 @@
 
   )
 
+;;8 bit music theory talks about ambient chord progressions
 
-(defn play-chords [nome instm chord-notes pattern]
-  (let [note-length (float (/ 1 (count pattern)))]
-    (flatten
-     (map-indexed
-      (fn [note amp]
-        (when (= amp 1)
-          (at (m (+ nome (* note note-length)))
-              (flatten (map instm (apply chord chord-notes))))))
-      pattern))))
+;;this provoked a though regarding voice leading between chords. Depending on what notes in what octaves
+;;you choose, a progression can sound smooth or "edgy",  Basically, if we have less total movement to
+;;get to a chord, it sounds smoother, what does it sound like if have more? What if we variate it?
 
-(defn play-measure [nome instm chord-notes pattern]
-  (let [next-bar (+ nome 4)]
-    (flatten
-     (map-indexed (fn [beat beat-pattern]
-                    (play-chords (+ nome beat) instm (first chord-notes) beat-pattern))
-                  pattern))
-    (apply-by (m next-bar) #'play-measure [next-bar instm (rest chord-notes) pattern])))
+;; https://www.youtube.com/watch?v=MycI9ZOSPRk&t=1s
+(defn voice-lead
+  [from-chord to-chord smoothness]
 
-;; (play-measure (m) insts/piano (cycle chords) (:somethin-sexy patterns))
+
+  )
