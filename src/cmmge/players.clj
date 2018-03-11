@@ -1,6 +1,31 @@
 (ns cmmge.players
   (:require [overtone.live :refer :all]))
 
+(def nice-names->intervals
+  {:u 0
+   :m2 1
+   :M2 2
+   :m3 3
+   :M3 4
+   :p4 5
+   :tt 6
+   :p5 7
+   :m6 8
+   :M6 9
+   :m7 10
+   :M7 11
+   :o 12})
+
+(def nice-names->note-values
+  {:whole 1
+   :half 0.5
+   :dotted-quarter 0.375
+   :quarter 0.25
+   :dotted-eighth 0.1875
+   :eighth 0.125
+   :sixteenth 0.0625
+   :thirty-second 0.03125})
+
 (defn melody-player [nome beat melody instm]
   (let [{:keys [pitch amp duration]} (first melody)
         sustain-secs (float (/ (beat-ms duration (metro-bpm nome)) 1000))

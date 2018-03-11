@@ -211,6 +211,24 @@
              next-note {:pitch next-pitch
                         :amp 1
                         :duration next-duration}]
-         (recur key length (conj melody next-note)))
+         (recur key length (conj melody next-note)))))))
 
-       ))))
+;;restrictions for a melody
+;;agnostic to key
+
+;;a motif is a few notes that for now, always add up to a multiple of two beats
+
+;;what characteristics do we want to control?
+;;distance traveled (pitch) to length ratio
+;;number of notes to length ratio
+;;range
+;;syncopated
+
+(def sample-motif
+  [{:pitch :u :duration :dotted-quarter}
+   {:pitch :p5 :duration :eighth}
+   {:pitch :p5 :duration :eighth}
+   ]
+  )
+
+(defn motif-maker)
