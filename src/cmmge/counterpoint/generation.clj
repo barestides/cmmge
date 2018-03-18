@@ -225,10 +225,56 @@
 ;;syncopated
 
 (def sample-motif
-  [{:pitch :u :duration :dotted-quarter}
-   {:pitch :p5 :duration :eighth}
-   {:pitch :p5 :duration :eighth}
-   ]
-  )
+  [{:pitch :u  :dur :e}
+   {:pitch :M2 :dur :e}
+   {:pitch :m3 :dur :e}
+   {:pitch :p5 :dur :e}
+   {:pitch :m3 :dur :q}])
 
-(defn motif-maker)
+(defn same-vol
+  [mel vol]
+  (mapv (fn [note]
+             (update note :amp #(if (= % 0)
+                                  0
+                                  vol)))
+        mel))
+
+(defn absolutize-melody
+  [melody root]
+  (map (fn [note]
+         (update note :pitch #(+ (% nice-names->intervals) root)))
+       melody))
+
+(defn swap-last
+  [motif interval]
+  (conj (into [] (butlast motif))
+        (assoc (last motif) :pitch interval)))
+
+(defn transpose
+  [interval motif]
+  (let [interval-int (interval nice-names->intervals)
+        intervals->nice-names (set/map-invert nice-names->intervals)]
+    (mapv
+     (fn [note]
+       (let [amt (+ interval-int (get nice-names->intervals (:pitch note)))]
+         (assoc note :pitch (get intervals->nice-names amt))))
+     motif)))
+
+(defn transformation
+  [fun motif]
+  (partial fun motif))
+
+(defn construct
+  [motif & transformations]
+  (absolutize-melody
+   (same-vol (apply concat
+                    motif
+                    (map #(% motif) transformations))
+             1)
+   38))
+
+(def someprog
+  (construct sample-motif
+             (partial transpose :m2)
+             (partial transpose :tt)
+             (partial transpose :p5)))
