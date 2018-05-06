@@ -231,14 +231,6 @@
    {:pitch :p5 :dur :e}
    {:pitch :m3 :dur :q}])
 
-(defn same-vol
-  [mel vol]
-  (mapv (fn [note]
-             (update note :amp #(if (= % 0)
-                                  0
-                                  vol)))
-        mel))
-
 (defn absolutize-melody
   [melody root]
   (map (fn [note]
@@ -260,21 +252,64 @@
          (assoc note :pitch (get intervals->nice-names amt))))
      motif)))
 
-(defn transformation
-  [fun motif]
-  (partial fun motif))
-
 (defn construct
   [motif & transformations]
   (absolutize-melody
-   (same-vol (apply concat
+   (pu/same-vol (apply concat
                     motif
                     (map #(% motif) transformations))
              1)
    38))
+
+
+;;let's do some stuff with drums
+;;I think this will be easier
+;;we can start with having a pattern that repeats
+;;fills can be defined by length, and deviation from the pattern
 
 (def someprog
   (construct sample-motif
              (partial transpose :m2)
              (partial transpose :tt)
              (partial transpose :p5)))
+
+;; I'm envisioning two sets of intervals that are used to construct a multi-bar melody
+;; The melody is formed by cycling through these sets.
+
+;;the first set cycles more slowly than the second set, say once per bar.
+
+;;the second set cycles at some factor of the first, with some randomization
+;;so if the cycle frequency for the first set is 4 beats,
+
+;;the second set cycles at n/4
+(def sample-ints [:u :m3 :p5 :m7])
+(def sample-prog [:u :m3 :p4 :p5])
+
+;; (defn op-mel-obj)
+
+;;how do we want to represent intervals? obviously, intervals are a concept we will use a lot.
+;;sometimes we want to work with them as integers, for instance, increasing an interval by somea
+;;amount. However, sometimes we want tow work with them as names or keywords, such as m. Like say
+;;we store sets to represent nodes, and these contain keywords like`:m2`. We could have the sets
+;;contain numbers instead, but that's less clear to work with from a musical perspective. At some point,
+;;whether for end user or for developing from a musical perspective, we will want to convert the numeric
+;;intervals to "nice" ones, and it's probably easiest to just access the data structure that plays the
+;;intervals. So rather than convert numbers to nice intervals, we should just store the intervals
+;;as more complex, and look at the other value in the map.
+
+;;That might have gotten off the rails, but I think I've arrived at a solution:
+;;Use a map to represent an interval. Right now I only envision it having a numeric value representing
+;;it's distance from the root, and a "name" for how it referred to musically. The name should be
+;;short keyword, no longer than 3 characters.
+
+
+;;map a sequence of pitches to a measure,, could add more notes in between, needs to decide where to
+;;put the pitches given into the measure.
+()
+
+
+(defn double-integer-sets
+  [prog mel]
+  (for [prog-note prog
+        mel-note mel]
+    {:pitch  (+ prog-note mel-note)}))

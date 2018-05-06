@@ -24,20 +24,38 @@
   {:pitch :c3 :dur len :amp 0})
 
 (def kaytranada-bd-lesson
-  (same-vol [{:pitch :c2 :dur :e}
-             (rest-note :s)
-             {:pitch :c2 :dur :s}
-             {:pitch :c2 :dur :e}
-             (rest-note :e)
-             {:pitch :c3 :dur :s}
-             {:pitch :c2 :dur :s}
-             (rest-note :e)
-             {:pitch :c2 :dur :s}
+  (pu/same-vol [{:pitch :c2 :dur :e}
+                (rest-note :s)
+                {:pitch :c2 :dur :s}
+                {:pitch :c2 :dur :e}
+                (rest-note :e)
+                {:pitch :c3 :dur :s}
+                {:pitch :c2 :dur :s}
+                (rest-note :e)
+                {:pitch :c2 :dur :s}
 
-             {:pitch :c3 :dur :s}
-             {:pitch :c3 :dur :et}
-             {:pitch :c3 :dur :et}
-             ]
+                {:pitch :c3 :dur :s}
+                {:pitch :c3 :dur :et}
+                {:pitch :c3 :dur :et}] 0.5))
 
+(defn loop-mel
+  [mel times]
+  (apply concat (take times (repeat mel))))
 
-            0.5))
+(def thriller-bassline
+  (pu/same-vol [{:pitch :eb3
+                 :dur :e}
+                {:pitch :f3
+                 :dur :e}
+                {:pitch :ab3
+                 :dur :e}
+                {:pitch :bb3
+                 :dur :e}
+                {:pitch :f3
+                 :dur :e}
+                (rest-note :e)
+                (rest-note :de)
+                {:pitch :f3
+                 :dur :s}]
+               0.5)
+  )

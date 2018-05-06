@@ -67,3 +67,11 @@
   ;;I'll get to it
   [tonic octaves mode]
   (apply sorted-set (map (partial + tonic) (concat minor-intervals (map (partial * -1) minor-intervals)))))
+
+(defn same-vol
+  [mel vol]
+  (mapv (fn [note]
+             (update note :amp #(if (= % 0)
+                                  0
+                                  vol)))
+        mel))
