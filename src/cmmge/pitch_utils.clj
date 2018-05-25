@@ -53,25 +53,3 @@
     (pos? shift) (recur (inc-first notes 12) (dec shift))
     (neg? shift) (recur (util/spy (dec-last notes 12)) (inc shift))
     (zero? shift) notes))
-
-(def minor-intervals
-  [0 2 3 5 7 8 10 12 14 15 17 19 20 22 24])
-
-(def major-intervals
-  [0 2 4 5 7 9 11])
-
-;;if we have 60 for the tonic, and 2 octaves,
-;;we want to return all of the notes 2 octaves above and below the tonic for the given mode
-
-(defn possible-notes
-  ;;I'll get to it
-  [tonic octaves mode]
-  (apply sorted-set (map (partial + tonic) (concat minor-intervals (map (partial * -1) minor-intervals)))))
-
-(defn same-vol
-  [mel vol]
-  (mapv (fn [note]
-             (update note :amp #(if (= % 0)
-                                  0
-                                  vol)))
-        mel))

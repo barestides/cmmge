@@ -5,6 +5,15 @@
 (def HALF 0.5)
 (def WHOLE 1)
 
+(def modes->ints
+  {:ionian     #{0 2 4 5 7 9 11}
+   :dorian     #{0 2 3 5 7 9 10}
+   :phrygian   #{0 1 3 5 7 8 10}
+   :lydian     #{0 2 4 6 7 9 11}
+   :mixolydian #{0 2 4 5 7 9 10}
+   :aeolian    #{0 2 3 5 7 8 10}
+   :locrian    #{0 1 3 5 6 8 10}})
+
 (def nice-names->intervals
   {:neg-u  -0
    :neg-m2 -1
@@ -52,6 +61,6 @@
    :q 0.25
    :de 0.1875
    :e 0.125
-   :et 0.8333
+   :et 0.04166
    :s 0.0625
    :ts 0.03125})

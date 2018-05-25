@@ -57,5 +57,73 @@
                 (rest-note :de)
                 {:pitch :f3
                  :dur :s}]
-               0.5)
+               0.5))
+
+;;when writing melodies out, we shouldn't need to write `dur` and `pitch` repeatedly,
+(defn flesh-out-melody
+  [melody]
+  (for [[dur pitch] melody]
+    (if pitch
+      {:dur dur :pitch pitch}
+      {:dur dur :rest? true})))
+
+
+;;jinkies handle anacruses
+;;https://en.wikipedia.org/wiki/Anacrusis
+;;for now, we'll just include extra rests in the lead-inbar
+;;jinkies slurs, esp across barlines
+(def a-hard-days-night-vocals
+  (flesh-out-melody
+   [[:h]
+    [:e]
+    [:e :g4]
+    [:e :g4]
+    [:e :f4]
+
+    [:h :g4]
+    [:dq :g4]
+    [:e :g4]
+
+    [:h :g4]
+    [:e]
+    [:e :g4]
+    [:e :g4]
+    [:e :f4]
+
+    [:e :g4]
+    [:e :bb4]
+    [:dq :bb4]
+    [:q :g4]
+    [:e :f4]
+
+    [:s :g4]
+    [:s :f4]
+    [:e :e4]
+    [:q :e4]
+    [:e]
+    [:e :e4]
+    [:e :f4]
+    [:e :e4]
+
+    [:h :g4]
+    [:dq :g4]
+    [:e :g4]
+
+    [:h :g4]
+    [:e]
+    [:e :g4]
+    [:e :g4]
+    [:e :f4]
+
+    [:e :g4]
+    [:e :bb4]
+    [:dq :bb4]
+    [:q :g4]
+    [:e :f4]
+
+    [:s :g4]
+    [:s :f4]
+    [:e :e4]
+    [:q :e4]
+    ])
   )

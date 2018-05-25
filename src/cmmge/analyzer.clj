@@ -1,5 +1,6 @@
 (ns cmmge.analyzer
   (:require [cmmge.util :as util]
+            [cmmge.constants :refer :all]
             [cmmge.counterpoint.cantus-firmi :as cantus-firmi]))
 
 ;;What do we want to look at?
@@ -7,14 +8,22 @@
 ;;variability - total note length traveled / cantus length
 ;;climax placement
 
+
 (defn distance-traveled
-  ([intervals total]
-   (if (= 1 (count intervals))
-     total
-     (recur (rest intervals)
-                  (+ (Math/abs (- (first intervals) (second intervals))) total))))
-  ([intervals]
-   (distance-traveled intervals 0)))
+  ([mel]
+   (distance-traveled (mapv :pitch mel) 0))
+  ([[first-note second-note :as mel] total]
+   (if second-note
+     (recur (rest mel) (+ total (Math/abs (- first-note second-note))))
+     total)))
+
+(defn melody-length
+  [mel pulse]
+  (/ (apply + (map #(nice-names->note-values (:dur %)) mel)) (nice-names->note-values pulse)))
+
+(defn smoothness-index
+  [mel pulse]
+  (float (/ (distance-traveled mel) (melody-length mel pulse))))
 
 (defn climax-index
   [coll]

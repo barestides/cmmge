@@ -1,13 +1,14 @@
 (ns cmmge.player
-  (:require
-   [overtone.music.pitch :as p]
-   [overtone.music.time :as t]
-   [overtone.music.rhythm :as r]
-   [overtone.at-at :as at-at]
-   [cmmge.constants :refer :all]))
+  (:require [overtone.music.pitch :as p]
+            [overtone.music.time :as t]
+            [overtone.music.rhythm :as r]
+            [overtone.at-at :as at-at]
+            [cmmge.chance-utils :as cu]
+            [cmmge.midi :as midi]
+            [cmmge.constants :refer :all]))
 
 (def player-state
-  {:metronome (r/metronome 120)
+  {:metronome (r/metronome 90)
    :pulse-note :q
    :playing (atom true)})
 
@@ -37,7 +38,6 @@
 
 ;;jinkies probs move this to a utils ns
 ;;also make it not fuck ugly
-;;also it maybe screws up for eighth note triplets...
 (defn real-dur
   [dur-note pulse nome]
   (let [dur-to-pulse (float (/ (dur-note nice-names->note-values)
@@ -59,7 +59,6 @@
                                (pulse nice-names->note-values)))
         real-dur (real-dur dur pulse nome)
         next-note (+ beat dur-to-pulse)]
-    (prn real-dur)
     (when-not rest? (at-at/at (nome beat) #(inst-fn midi-note real-dur) pool))
     (when (not-empty (rest pattern))
       (t/apply-by (nome next-note) #'play-melodic-pattern
@@ -75,7 +74,7 @@
   [state track]
   (let [{:keys [pulse-note metronome]} state
         {:keys [inst-fn pattern]} track]
-    (play-one-pattern metronome (metronome) pattern inst-fn pulse-note)))
+    (play-drum-pattern metronome (metronome) pattern inst-fn pulse-note)))
 
 (defn play-track
   [state track]
@@ -103,9 +102,54 @@
 ;;if it's data, I think it's easier to generate, makes realtime modulation difficult
 ;;no matter what, at some point it needs to get to being data, so we'll start with that.
 
-
 (defn play-tracks
   [tracklist]
   (r/metro-start (:metronome player-state) 0)
   (doseq [track tracklist]
     (play-track player-state track)))
+
+(def live-player-state
+  {:playing? (atom true)
+   :step-skip-pct midi/step-skip-pct
+   :up-down-pct midi/up-down-pct
+   :nome (r/metronome 120)
+   :pattern (cycle [:e :e :q])
+   :pulse :q
+   :inst-fn (:piano midi/inst-fns)})
+
+
+(defn change-skip-pct
+  [amount]
+  (swap! (:step-skip-pct live-player-state) + amount)
+  (prn @(:step-skip-pct live-player-state)))
+
+(defn pause!
+  []
+  (reset! (:playing? live-player-state) false))
+
+;;should add support for staying within the pitch
+;;further, could have another controller that can adjust how close to the key the possible notes are
+
+(defn next-pitch
+  [last-note step-skip-pct up-down-pct]
+  (prn step-skip-pct)
+  (prn up-down-pct)
+  ;;if pct is 0, we should always step, if it's 1, always leap
+  (let [step-or-leap (cu/weighted-choose {:step (- 1 step-skip-pct) :leap step-skip-pct})
+        up-or-down (cu/weighted-choose {1 up-down-pct -1 (- 1 up-down-pct)})
+        interval (* up-or-down (rand-nth (step-or-leap {:step [0 2] :leap [3 4 5 6 7]})))]
+    (+ last-note interval)))
+
+(defn live-player
+  [beat last-note state]
+  (let [{:keys [playing? step-skip-pct nome pattern pulse inst-fn up-down-pct]} state
+        dur (first pattern)
+        dur-to-pulse (float (/ (dur nice-names->note-values)
+                               (pulse nice-names->note-values)))
+        real-dur (real-dur dur pulse nome)
+        next-beat (+ beat dur-to-pulse)
+        next-pitch (next-pitch last-note @step-skip-pct @up-down-pct)]
+    (when @playing?
+      (at-at/at (nome beat) #(inst-fn next-pitch real-dur) pool)
+      (t/apply-by (nome next-beat) #'live-player
+                  [next-beat next-pitch (update state :pattern rest)]))))
